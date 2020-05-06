@@ -1,0 +1,264 @@
+一、Servlet简介
+
+Tomcat 是servlet的容器
+
+TCP/IP协议：客户端-服务器（Client-Server）模型
+当多台计算机需要相互通信传输数据时，他们必须遵循相同的协议（Protocol），协议可以认为是通信双⽅遵循的⼀种约定——在此基础之上，双⽅才能够相互理解通信的内容。
+
+一个完整的URL各部分的含义
+{协议}：//{主机名}:{端口号}/{路径}/{文件}?{参数}
+
+常用的方法有: GET, POST, PUT, DELETE, OPTIONS, HEAD。
+
+状态码
+状态码是由3位数组成，第一个数字定义了响应的类别，且有五种可能取值:
+
+1xx 【消息】服务器收到请求，需要请求者继续执行操作
+2xx 【成功】请求已成功被服务器接收、理解、并接受。
+3xx 【重定向】客户端需要采取进一步的操作以完成请求
+4xx 【客户端请求错误】客户端错误，请求包含语法错误或无法完成请求
+5xx 【服务器错误】服务器在处理请求的过程中发生了错误
+平时遇到比较常见的状态码有:200, 204, 301, 302, 304, 400, 401, 403, 404, 422, 500等：
+
+200 OK //客户端请求成功
+304 Not Modified // 未修改。所请求的资源未修改，服务器返回此状态码时，不会返回任何资源
+400 Bad Request //客户端请求有语法错误，不能被服务器所理解
+401 Unauthorized // 当前请求要求用户的身份认证
+403 Forbidden // 服务器理解请求客户端的请求，但是拒绝执行此请求
+404 Not Found //请求资源不存在，输入了错误的URL
+500 Internal Server Error //服务器发生不可预期的错误
+503 Server Unavailable // 由于超载或系统维护，服务器暂时的无法处理客户端的请求。一段时间后可能恢复正常
+
+用户点击一个链接后发生的什么？  
+1.浏览器分析链接所指的页面的URL；  
+2.浏览器向域名系统DNS请求解析URL的IP地址。  
+3.浏览器和服务器建立TCP连接，  
+4.浏览器发出取文件的命令：GET
+ (web sever 和客户端通信http，摘出路径和参数)（helper app处理数据，然后扔给web sever）
+5.服务器给出相应，把文件index.html发给浏览器。  
+6.浏览器解析渲染页面   
+7.TCP断开连接
+
+静态页面：  
+conf文件夹里web.xml里false改为true  
+静态的在webapps文件夹ROOT里。
+
+
+
+
+
+tomcat跑在java虚拟机上（jvm）
+
+127.0.0.1 localhost本机
+
+main()从tomcat开始，在tomcat上面
+
+Tomcat 分web sever （和客户端通信http，摘出路径和参数，只是取出来，如果是静态的就自己处理了）和 web （servlet） container（管理servlet，将死的变活，交给class管理。URL path绑定了对应的class）
+
+web container创建request和response对象，找出并扔给对应的servlet，读取request，修改response对象，然后扔给container，container再交给sever（不是对象）。
+
+maven和pom.xml相连，
+
+
+
+@WebServlet("/add"),绑定URL，和下面代码功能一样。
+<servlet>
+    <servlet-name>1stApp</servlet-name>
+    <servlet-class>club.banyuan.WebAPP</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>1stApp</servlet-name>
+    <url-pattern>/demo</url-pattern>
+  </servlet-mapping>
+缺点：
+1.找的时候难找
+2.如果想改名，需要重新编译，写在xml里，不需要重新编译，需要部署（部署和编译不是一回事）
+
+servlet处理数据，把得到的数据扔给jsp，jsp生成html。（jsp是一个servlet）
+
+mvc模型（过时了，没有v，及jsp）
+（图片见图片mcv.jpg）
+
+
+Controller：到model找数据，控制怎么走，
+View：加工数据，生成html文档
+Model：处理数据
+
+
+
+
+
+使用Maven创建和部署Servlet项目:
+
+创建项目:mvn archetype:generate(在一个空的文件目录下)
+终端下操作：(创建部署过程.jpg)
+
+生成成功在idea打开，
+新建java.club.banyuan
+将java包设为sources root（图见2.jpg）
+
+
+POM加入 servlet 依赖
+<dependency>
+  <groupId>javax.servlet</groupId>
+  <artifactId>javax.servlet-api</artifactId>
+  <version>4.0.1</version>
+  <scope>provided</scope>
+</dependency>
+
+POM指定 JRE 版本
+<plugin>
+    <artifactId>maven-compiler-plugin</artifactId>
+    <configuration>
+	<source>11</source>
+	<target>11</target>
+    </configuration>
+</plugin>
+
+在项目的POM文件中配置Tomcat的插件pom.xml
+<plugin>
+    <groupId>org.apache.tomcat.maven</groupId>
+    <artifactId>tomcat7-maven-plugin</artifactId>
+    <version>2.2</version>
+    <configuration>
+	<url>http://localhost:8080/manager/text</url>
+	<server>TomcatServer</server>
+	<path>/myapp</path>
+    </configuration>
+</plugin>
+
+在DD文件中(web.xml)配置servlet映射关系
+一、第一种方法：
+<servlet>
+    <servlet-name>my-1st-servlet</servlet-name>
+    <servlet-class>club.banyuan.ServletDemo</servlet-class>
+</servlet>
+<servlet-mapping>
+    <servlet-name>my-1st-servlet</servlet-name>
+    <url-pattern>/aaa</url-pattern>
+</servlet-mapping>
+二、第二种方法：直接注释，@WebServlet("/名字")即绑定
+
+
+mvn package  生成war包
+
+mvn tomcat7:deploy  与pom.xml中部署有关，将war包推给tomcat，解压war包
+
+把写好的servelt里面的doGet方法删除，会怎么样
+两个方法如果不被重写，那执行时默认会调用HttpServlet的代码(继承)，首先获取协议，然后获取国际化字符串，最后判断协议，如果协议为HTTP/1.1，返回405禁止访问方法错误，如果不是HTTP/1.1，返回400错误的请求错误。
+
+
+Servlet里不要有变量（线程安全问题）
+
+1.若该请求是第一次发出，则服务器将把该Servlet加载到内存，读取配置文件初始化线程池；
+注：也可以在WEB.XML文件中配置，让Servlet在WEB服务器开启时就创建。
+使用<load-on-startup>标签，标签内为非负整数，值越小（大于0）启动优先级越高。
+用途：为web应用写一个InitServlet，这个servlet配置为启动时装载，为整个web应用创建必要的数据库表和数据。
+2.调用init（）方法对该Servlet进行初始化；
+3.Servlet容器通过调度线程(Dispatchaer Thread) 调度它管理下的线程池中等待执行的线程（Worker Thread）给请求者，创建ServletRequest对象（服务请求对象）和ServletResponse对象（服务响应对象）；
+注：Servlet为单例多线程，即只有一个Servlet，可有多个请求！此时的ServletRequest对象包含请求头和请求体，取值均为浏览器传值，而 ServletResponse对象的响应头和相应体均为空！
+4.将ServletRequest对象和ServletResponse对象作为参数传给service（）方法；
+5.service（）方法开始处理请求，并将响应信息写入ServletResponse对象；
+6.Servlet将ServletResponse对象返回给tomcat；
+7.tomcat解析ServletResponse对象，对浏览器做出响应。
+
+
+
+GET ：获取信息，是无副作用的，是幂等的，且可缓存
+POST ：修改服务器上的数据，有副作用，非幂等，不可缓存
+PUT：新增或替换资源，幂等
+Delete：删除资源
+
+幂等----多次操作结果保持一致
+
+
+
+
+
+
+
+阐述redirect和request dispatch的区别.   
+1、RequestDispatch，请求转发是在同一个请求中完成的，因此整个过程只包含一个请求。
+向目标组件传送了当前的request, response，所以下一个组件包含了上一个组件的信息。  
+2、Redirect重定向，一旦调用就表示这个请求结束了。因此在初次访问时，servlet响应返回给客户端一个重定向的地址，客户端再发送第二个请求去访问该地址。
+因而整个过程包含两个请求。没有向下一个组件发送任何的信息，只是向url栏重新置入地址。
+
+
+阐述redirect location的不同形式. 
+response.redirect是请求转向，location.href 是浏览器转向．
+事实上，如果在客户端中，js语句中同样也存在redirect语句，这时两者的作用一样． 但机理不同，redirect只是一个转向语句，遇到该语句时，直接转向，客户端是两次请求的． 而location相当于你在地址栏中输入了地址后按回车！ 如果对转向没有控制的话，两者在客户端是一样的． 但response.redirect往往用于服务端，而location只能用在客户端！
+也就是说location.href是在客户端提出的重定向，response.redirect是在服务器端提出的重定向。window.location.href 语句可以实现一个框架的页面在执行服务器端代码后刷新另一个框架的页面
+
+
+response.setContentType("application/jar");  下载
+
+text/html
+application/pdf
+video/quicktime
+application/java
+image/jpeg
+application/jar
+application/octet-stream
+application/x-zip
+
+没有斜杠：
+输入myapp/abc
+resp.sendRedirect("hello");
+跳转到myapp/helllo
+resp.sendRedirect("hello/hello2");
+跳转到myapp/helllo/hello2
+
+一个斜杠：
+输入myapp/abc
+resp.sendRedirect("/hello");
+跳转到hello
+两个斜杠：
+网络路径
+
+
+
+
+
+
+Filter的概述
+
+Filter称为过滤器，它是Servlet技术中最实用的技术，web开发人员通过Filter技术，对web服务器所管理的资源（JSP，Servlet，静态图片或静态html文件）进行拦截，从而实现一些特殊的功能。
+
+Filter就是过滤从客户端向服务器发送的请求。
+
+第一步：编写一个类实现Filter接口
+
+ 
+
+第二步：对过滤器进行配置
+
+<filter>
+
+<filter-name>filterName</filter-name>
+
+<filter-class>quanlujing</filter-class>
+
+<filter>
+
+<filter-mapping>
+
+<filter-name>filterName</filter-name>
+
+<url-pattern>/*</url-pattern>
+
+</filter-mapping>
+
+什么是FilterChain
+
+FilterChain过滤器链：在一个web应用中，可以开发编写多个Filter，这些Filter组合起来称为是一个过滤器链。
+
+Web服务器根据Filter在web.xml文件中的注册顺序（mapping的配置顺序）决定先调用哪个Filter。依次调用后面的过滤器，如果没有下一个过滤器，调用目标资源。处理response过滤器顺序和request是反的。
+
+ <url-pattern>的配置
+
+完全路径匹配 ：以/开始   比如/aaa  /aaa/bbb
+
+目录匹配 ：以/开始 以*结束  比如/*  /aaa/*  /aaa/bbb/*
+
+扩展名匹配    ：不能以/开始 以*开始 比如*.jsp  *.do   *.action
+
