@@ -9,17 +9,12 @@ import java.util.List;
 public class BlogService {
     public List<Blog> findBlogs(User user,Integer page, Integer size) {
         List<Blog> blogs = new ArrayList<>();
-        if (page==1){
-            for (Integer i=0;i<size;i++){
-                Blog blog = new Blog(i, "title " + i, "content " + i);
-                blogs.add(blog);
-            }
-        }else {
-        for (Integer i = page*10; i <page*10+size; i++) {
+        
+        for (Integer i =(page-1)*10; i <(page-1)*10+size; i++) {
             Blog blog = new Blog(i, "title " + i, "content " + i);
             blogs.add(blog);
         }
-        }
+
         return blogs;
     }
 }
