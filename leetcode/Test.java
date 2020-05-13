@@ -14,8 +14,11 @@ public class Test {
 //          Java8 java8=new Java8();
 //          Boolean b=java8.buddyStrings("abcd","abcd");
 //          System.out.println(b);
-          Java9 java9=new Java9();
-          int a=java9.lengthOfLastWord(" ");
-        System.out.println(a);
+//          Java9 java9=new Java9();
+//          int a=java9.lengthOfLastWord(" ");
+//        System.out.println(a);
+        Java10 java10=new Java10();
+        boolean b=java10.checkPossibility(new int[]{3, 4, 2, 3});
+        System.out.println(b);
     }
 }
